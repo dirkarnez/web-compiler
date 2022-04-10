@@ -155,8 +155,9 @@
             width: 99%;
             height: 95vh;
         }
+
         #editor-container {
-        height: 375px;
+            height: 375px;
         }
     </style>
     <script type="text/javascript" src="//code.jquery.com/jquery-1.9.1.js"></script>
@@ -177,8 +178,7 @@
 
 
     <!--  -->
-    <link rel="stylesheet"
-      href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/default.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/default.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js"></script>
 
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
@@ -192,14 +192,49 @@
         <textarea id="keyboard" rows="52" cols="80" placeholder="Enter Text..." style="width:98%;"></textarea>
     </div>
 
-
+    <button onclick="compileQuill()">Compile (g++ -std=c++20 -O2 -Wall -pedantic -pthread main.cpp)</button>
     <div id="editor-container">
+<pre>
+// Your First C++ Program
+#include &lt;iostream&gt;
+
+int main() {
+    std::cout << "Hello World!";
+    return 0;
+}
+</pre>
     </div>
 
     <script>
+
         function compile() {
             const value = window.editor.getValue();
-            
+
+            fetch("http://coliru.stacked-crooked.com/compile", {
+                headers: {
+                    accept: "*/*",
+                    "content-type": "text/plain;charset=UTF-8"
+                },
+                body: JSON.stringify({
+                    cmd: "g++ -std=c++20 -O2 -Wall -pedantic -pthread main.cpp && ./a.out",
+                    src: value
+                }),
+                redirect: 'follow',
+                method: "POST"
+            })
+                .then(response => response.text())
+                .then(data => {
+                    alert('Success:' + data);
+                })
+                .catch((error) => {
+                    alert('Error: ' + error);
+                });
+        }
+
+        function compileQuill() {
+            var value = window.quill.getText();
+
+            debugger;
             fetch("http://coliru.stacked-crooked.com/compile", {
                 headers: {
                     accept: "*/*",
@@ -222,16 +257,16 @@
         }
 
         hljs.configure({   // optionally configure hljs
-        languages: ['javascript', 'cpp', 'python']
+            languages: ['javascript', 'cpp', 'python']
         });
-                
 
-        var quill = new Quill('#editor-container', {
-        modules: {
-            syntax: true,              // Include syntax module
-            toolbar: [['code-block']]  // Include button in toolbar
-        },
-        theme: 'snow'  // or 'bubble'
+
+        window.quill = new Quill('#editor-container', {
+            modules: {
+                syntax: true,              // Include syntax module
+                toolbar: [['code-block']]  // Include button in toolbar
+            },
+            theme: 'snow'  // or 'bubble'
         });
 
         $(window).load(function () {
@@ -243,7 +278,7 @@
             const input = editor.getInputField();
 
             editor.setValue
-(`// Your First C++ Program
+                (`// Your First C++ Program
 
 #include <iostream>
 
@@ -278,7 +313,7 @@ int main() {
                 },
                 layout: 'custom',
                 customLayout: {
-                    
+
                     'normal': [
                         '` 1 2 3 4 5 6 7 8 9 0 - = {bksp}',
                         '~ ! @ # $ % ^ & * ( ) _ + ',
